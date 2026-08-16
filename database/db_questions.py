@@ -1,4 +1,6 @@
 import sqlite3
+import random
+
 from database import db_language
 from database import db_debug
 from models.question import Question
@@ -6,6 +8,7 @@ from models.verb import Verb
 from models.tense import Tense
 from models.person import Person
 from models.verb_instance import VerbInstance
+
 
 def add_question(connection, question: Question):
     cursor = connection.cursor()
@@ -117,6 +120,36 @@ def get_daily_questions_hard(connection, count=10):
         return []
 
     questions = create_questions_from_ids(connection, question_ids=question_ids)
+    
+    random.shuffle(questions)
+
+    return questions
+
+def get_daily_questions_easy(connection, count=10):
+    cursor = connection.cursor()
+
+    question_ids = select_easiest_questions(connection, count)
+
+    if not question_ids:
+        return []
+
+    questions = create_questions_from_ids(connection, question_ids=question_ids)
+
+    random.shuffle(questions)
+
+    return questions
+
+def get_daily_questions_random(connection, count=10):
+    cursor = connection.cursor()
+
+    question_ids = select_random_questions(connection, count)
+
+    if not question_ids:
+        return []
+
+    questions = create_questions_from_ids(connection, question_ids=question_ids)
+
+    random.shuffle(questions)
 
     return questions
 
@@ -222,6 +255,18 @@ def create_questions_from_ids(connection, question_ids):
         )
 
     return list(questions.values())
+
+def get_all_questions(connection):
+
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT id FROM questions
+    """)
+
+    ids = [row[0] for row in cursor.fetchall()]
+
+    return create_questions_from_ids(connection=connection, question_ids=ids)
 
 def delete_question(connection, question_id):
     cursor = connection.cursor()
