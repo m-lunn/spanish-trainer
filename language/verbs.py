@@ -58,4 +58,6 @@ verbs = [
     Verb("sentir", "to feel"),
     Verb("quemar", "to burn"),
     Verb("traer", "to bring"),
+    Verb("ayudar", "to help"),
+    Verb("alegrar", "to gladden")
 ]

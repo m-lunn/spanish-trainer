@@ -1,4 +1,37 @@
 from models.question import Question
+from models.verb_instance import VerbInstance
+from models.verb import Verb
+from language.tenses import Tenses
+from language.persons import Persons
+
+indicative_past_perfect = Tenses[0]
+indicative_preterite = Tenses[1]
+indicative_imperfect = Tenses[2] 
+indicative_present_perfect = Tenses[3]
+indicative_present = Tenses[4]
+indicative_conditional = Tenses[5]
+indicative_conditional_perfect = Tenses[6]
+indicative_future = Tenses[7]
+indicative_future_perfect = Tenses[8]
+subjunctive_past_perfect = Tenses[9]
+subjunctive_imperfect = Tenses[10]
+subjunctive_present_perfect = Tenses[11]
+subjunctive_present = Tenses[12]
+imperative_postive = Tenses[13]
+imperative_negative = Tenses[14]
+progressive_past = Tenses[15]
+progressive_present = Tenses[16]
+progressive_future = Tenses[17]
+progressive_conditional = Tenses[18]
+infinitive = Tenses[19]
+
+first_singular = Persons[0]
+second_singular = Persons[1]
+third_singular = Persons[2]
+first_plural = Persons[3]
+second_plural = Persons[4]
+third_plural = Persons[5]
+nil_person = Persons[6]
 
 questions = [
 
@@ -10,81 +43,132 @@ questions = [
     Question(
         "I had eaten before they arrived.",
         "Había comido antes de que llegaran.",
-        14,     # comer
-        1,      # indicative past perfect
-        1       # yo
+        [
+            VerbInstance(
+                Verb("comer", "to eat"),
+                indicative_past_perfect,
+                first_singular
+            ),
+            VerbInstance(
+                Verb("llegar", "to arrive"),
+                indicative_preterite,
+                third_plural
+            )
+        ]
     ),
 
     # 2. Preterite
     Question(
         "We went to the beach yesterday.",
         "Fuimos a la playa ayer.",
-        13,     # ir
-        2,      # indicative preterite
-        4       # nosotros
+        [
+            VerbInstance(
+                Verb("ir", "to go"),
+                indicative_preterite,
+                first_plural
+            )
+        ]
     ),
 
     # 3. Imperfect
     Question(
         "She used to speak Spanish every day.",
         "Ella hablaba español todos los días.",
-        20,     # hablar
-        3,      # indicative imperfect
-        3       # ella
+        [
+            VerbInstance(
+                Verb("hablar","to speak"),
+                indicative_imperfect,
+                third_singular
+            ),
+        ]
     ),
 
     # 4. Present Perfect
     Question(
         "I have seen that movie before.",
         "He visto esa película antes.",
-        12,     # ver
-        4,      # indicative present perfect
-        1       # yo
+        [
+            VerbInstance(
+                Verb("ver", "to see"),
+                indicative_present_perfect,
+                first_singular
+            )
+        ]
     ),
 
     # 5. Present
     Question(
         "They understand the question.",
         "Entienden la pregunta.",
-        24,     # entender
-        5,      # indicative present
-        6       # ellos
+        [
+            VerbInstance(
+                Verb("entender", "to understand"),
+                indicative_present,
+                third_plural
+            )
+        ]
     ),
 
     # 6. Conditional
     Question(
         "I could help you.",
         "Podría ayudarte.",
-        10,     # poder
-        6,      # indicative conditional
-        1       # yo
+        [
+            VerbInstance(
+                Verb("poder", "to be able to"),
+                indicative_conditional,
+                first_singular
+            ),
+            VerbInstance(
+                Verb("ayudar", "to help"),
+                infinitive,
+                nil_person
+            )
+        ]
     ),
 
     # 7. Conditional Perfect
     Question(
         "She would have wanted to come.",
         "Ella habría querido venir.",
-        8,      # querer
-        7,      # indicative conditional perfect
-        3       # ella
+        [
+            VerbInstance(
+                Verb("querer", "to want"),
+                indicative_conditional_perfect,
+                third_singular
+            ),
+            VerbInstance(
+                Verb("venir", "to come"),
+                infinitive,
+                nil_person
+            )
+        ]
     ),
 
     # 8. Future
     Question(
         "I will come tomorrow.",
         "Vendré mañana.",
-        18,     # venir
-        8,      # indicative future
-        1       # yo
+        [
+            VerbInstance(
+                Verb("venir", "to come"),
+                indicative_future,
+                first_singular
+            )
+        ]
     ),
 
     # 9. Future Perfect
     Question(
         "We will have finished the project by Friday.",
         "Habremos terminado el proyecto para el viernes.",
-        38,     # terminar
-        9,      # indicative future perfect
-        4       # nosotros
+        [
+            VerbInstance(
+                Verb("terminar", "to finish"),
+                indicative_future_perfect,
+                first_plural
+            )
+        ]
     ),
 
 
@@ -94,38 +178,73 @@ questions = [
 
     # 10. Past Perfect Subjunctive
     Question(
-        "I wish I had known the answer.",
-        "Ojalá hubiera sabido la respuesta.",
-        7,      # saber
-        10,     # subjunctive past perfect
-        1       # yo
+        "If I had known the answer.",
+        "Sí hubiera sabido la respuesta.",
+        [
+            VerbInstance(
+                Verb("saber", "to know"),
+                subjunctive_past_perfect,
+                first_singular)
+        ]
     ),
 
     # 11. Imperfect Subjunctive
     Question(
         "I wanted you to come.",
         "Quería que vinieras.",
-        18,     # venir
-        11,     # subjunctive imperfect
-        2       # tú
+        [
+            VerbInstance(
+                Verb("querer", "to want"),
+                indicative_imperfect,
+                first_singular
+            ),
+            VerbInstance(
+                Verb("venir", "to come"),
+                subjunctive_imperfect,
+                second_singular
+            )
+        ]
     ),
 
     # 12. Present Perfect Subjunctive
     Question(
         "I am glad that she has arrived.",
         "Me alegra que ella haya llegado.",
-        45,     # llegar
-        12,     # subjunctive present perfect
-        3       # ella
+        [
+            VerbInstance(
+                Verb("alegrar", "to gladden"),
+                indicative_present,
+                first_singular
+            ),
+            VerbInstance(
+                Verb("llegar", "to arrive"),
+                subjunctive_present_perfect,
+                third_singular
+            )
+        ]
     ),
 
     # 13. Present Subjunctive
     Question(
         "I hope you can come tomorrow.",
         "Espero que puedas venir mañana.",
-        10,     # poder
-        13,     # subjunctive present
-        2       # tú
+        [
+            VerbInstance(
+                Verb("esperar", "to hope"),
+                indicative_present,
+                first_singular
+            ),
+            VerbInstance(
+                Verb("poder", "to be able to"),
+                subjunctive_present,
+                second_singular
+            ),
+            VerbInstance(
+                Verb("venir", "to come"),
+                infinitive,
+                nil_person
+            )
+        ]
     ),
 
 
@@ -137,18 +256,26 @@ questions = [
     Question(
         "Open the door!",
         "¡Abre la puerta!",
-        42,     # abrir
-        14,     # imperative affirmative
-        2       # tú
+        [
+            VerbInstance(
+                Verb("abrir", "to open"),
+                imperative_postive,
+                second_singular
+            )
+        ]
     ),
 
     # 15. Negative Imperative
     Question(
         "Don't close the door!",
         "¡No cierres la puerta!",
-        43,     # cerrar
-        15,     # imperative negative
-        2       # tú
+        [
+            VerbInstance(
+                Verb("cerrar", "to close"),
+                imperative_negative,
+                second_singular
+            )
+        ]
     ),
 
 
@@ -160,35 +287,51 @@ questions = [
     Question(
         "I was sleeping when you called.",
         "Estaba durmiendo cuando llamaste.",
-        19,     # dormir
-        16,     # progressive past
-        1       # yo
+        [
+            VerbInstance(
+                Verb("dormir", "to sleep"),
+                progressive_past,
+                first_singular
+            )
+        ]
     ),
 
     # 17. Present Progressive
     Question(
         "We are cooking dinner.",
         "Estamos cocinando la cena.",
-        26,     # cocinar
-        17,     # progressive present
-        4       # nosotros
+        [
+            VerbInstance(
+                Verb("cocinar", "to cook"),
+                progressive_present,
+                first_plural
+            )
+        ]
     ),
 
     # 18. Future Progressive
     Question(
         "They will be speaking Spanish.",
         "Estarán hablando español.",
-        20,     # hablar
-        18,     # progressive future
-        6       # ellos
+        [
+            VerbInstance(
+                Verb("hablar", "to speak"),
+                progressive_future,
+                third_plural
+            )
+        ]
     ),
 
     # 19. Conditional Progressive
     Question(
         "I would be waiting for you.",
         "Estaría esperándote.",
-        28,     # esperar
-        19,     # progressive conditional
-        1       # yo
+        [
+            VerbInstance(
+                Verb("esperar", "to wait/hope"),
+                progressive_conditional,
+                first_singular
+            )
+        ]
     ),
 ]
