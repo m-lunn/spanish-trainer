@@ -1,126 +1,234 @@
 import sqlite3
+from database import db_language
+from database import db_debug
 from models.question import Question
+from models.verb import Verb
+from models.tense import Tense
+from models.person import Person
+from models.verb_instance import VerbInstance
 
-DATABASE = "spanish.db"
-
-def connect():
-    connection = sqlite3.connect(DATABASE)
-    connection.execute("PRAGMA foreign_keys = ON")
-    return connection
-
-def add_question(english, spanish, verb_infinitive, tense_name):
-    connection = connect()
-    cursor = connection.cursor()
-
-    # Get verb_id
-    cursor.execute("SELECT id FROM verbs WHERE infinitive = ?", (verb_infinitive,))
-    verb_id = cursor.fetchone()
-    if verb_id is None:
-        raise ValueError(f"Verb '{verb_infinitive}' not found in database.")
-    verb_id = verb_id[0]
-
-    # Get tense_id
-    cursor.execute("SELECT id FROM tenses WHERE name = ?", (tense_name,))
-    tense_id = cursor.fetchone()
-    if tense_id is None:
-        raise ValueError(f"Tense '{tense_name}' not found in database.")
-    tense_id = tense_id[0]
-
-    # Insert question
-    cursor.execute("""
-        INSERT OR IGNORE INTO questions (english, spanish, verb_id, tense_id)
-        VALUES (?, ?, ?, ?)
-    """, (english, spanish, verb_id, tense_id))
-
-    connection.commit()
-    connection.close()
-
-def add_questions_from_list(questions):
-    for question in questions:
-        add_question(question.english, question.spanish, question.infinitive, question.tense)
-
-def get_daily_questions_hard(count=10):
-    connection = connect()
+def add_question(connection, question: Question):
     cursor = connection.cursor()
 
     cursor.execute("""
+        INSERT OR IGNORE INTO questions (english, spanish)
+        VALUES (?, ?)
+    """, (question.english, question.spanish))
+    
+    question_id = cursor.lastrowid
+    
+    for verb_instance in question.verb_instances:
+        db_language.add_verb_from_verb_object(
+            connection,
+            verb=verb_instance.verb
+        )
+        verb_id = db_language.get_verb_id_from_infinitive(
+            connection, verb_instance.verb.infinitive
+        )
+        tense_id = db_language.get_tense_id(
+            connection,
+            code=verb_instance.tense.code
+        )
+        person_id = db_language.get_person_id(
+            connection,
+            code=verb_instance.person.code
+        )
+        cursor.execute("""
+            INSERT OR IGNORE INTO question_verb_instances (question_id, verb_id, tense_id, person_id)
+            VALUES (?, ?, ?, ?)
+        """, (question_id, verb_id, tense_id, person_id)
+            )
+
+def select_hardest_questions(connection, count=10):
+    cursor = connection.cursor()
+
+    cursor.execute("""
+            SELECT
+                q.id
+            FROM questions q
+    
+            INNER JOIN question_verb_instances qvi
+                ON q.id = qvi.question_id
+    
+            LEFT JOIN verb_mastery vm
+                ON qvi.verb_id = vm.verb_id
+                AND qvi.tense_id = vm.tense_id
+                AND qvi.person_id = vm.person_id
+    
+            GROUP BY q.id
+    
+            ORDER BY
+                MIN(COALESCE(vm.mastery, 0)) ASC,
+                RANDOM()
+    
+            LIMIT ?
+        """, (count,))
+
+    return [row[0] for row in cursor.fetchall()]
+
+def select_easiest_questions(connection, count=10):
+    cursor = connection.cursor()
+
+    cursor.execute("""
+            SELECT
+                q.id
+            FROM questions q
+    
+            INNER JOIN question_verb_instances qvi
+                ON q.id = qvi.question_id
+    
+            LEFT JOIN verb_mastery vm
+                ON qvi.verb_id = vm.verb_id
+                AND qvi.tense_id = vm.tense_id
+                AND qvi.person_id = vm.person_id
+    
+            GROUP BY q.id
+    
+            ORDER BY
+                MAX(COALESCE(vm.mastery, 0)) ASC,
+                RANDOM()
+    
+            LIMIT ?
+        """, (count,))
+
+    return [row[0] for row in cursor.fetchall()]
+
+def select_random_questions(connection, count=10):
+    cursor = connection.cursor()
+
+    cursor.execute("""
+            SELECT
+                q.id
+            FROM 
+                questions q
+            ORDER BY
+                RANDOM()
+            LIMIT ?
+        """, (count,))
+
+    return [row[0] for row in cursor.fetchall()]
+
+def get_daily_questions_hard(connection, count=10):
+    cursor = connection.cursor()
+
+    question_ids = select_hardest_questions(connection, count)
+
+    if not question_ids:
+        return []
+
+    questions = create_questions_from_ids(connection, question_ids=question_ids)
+
+    return questions
+
+def create_questions_from_ids(connection, question_ids):
+    cursor = connection.cursor()
+
+    # ---------------------------------------------------------
+    # Retrieve questions and all their verb instances
+    # ---------------------------------------------------------
+    
+    placeholders = ",".join("?" for _ in question_ids)
+
+    cursor.execute(f"""
         SELECT
             q.id,
             q.english,
             q.spanish,
-            q.verb_id,
-            q.tense_id,
-            COALESCE(vm.mastery, 0)
+
+            v.id,
+            v.infinitive,
+            v.english,
+
+            t.id,
+            t.code,
+            t.mood,
+            t.timeframe,
+            t.auxiliary_verb_id,
+
+            p.id,
+            p.code,
+            p.person_number,
+            p.plurality
+
         FROM questions q
-        LEFT JOIN verb_mastery vm
-            ON q.verb_id = vm.verb_id
-            AND q.tense_id = vm.tense_id
-        ORDER BY
-            COALESCE(vm.mastery, 0) ASC,
-            RANDOM()
-        LIMIT ?
-    """, (count,))
+
+        INNER JOIN question_verb_instances qvi
+            ON q.id = qvi.question_id
+
+        INNER JOIN verbs v
+            ON qvi.verb_id = v.id
+
+        INNER JOIN tenses t
+            ON qvi.tense_id = t.id
+
+        LEFT JOIN persons p
+            ON qvi.person_id = p.id
+
+        WHERE q.id IN ({placeholders})
+
+        ORDER BY q.id
+    """, question_ids)
 
     rows = cursor.fetchall()
 
-    connection.close()
+    # ---------------------------------------------------------
+    # Build the Python objects
+    # ---------------------------------------------------------
 
-    return [
-        Question(
-            id=row[0],
-            english=row[1],
-            spanish=row[2],
-            verb_id=row[3],
-            tense_id=row[4]
+    questions = {}
+
+    for row in rows:
+
+        question_id = row[0]
+
+        if question_id not in questions:
+            questions[question_id] = Question(
+                id=row[0],
+                english=row[1],
+                spanish=row[2],
+                verb_instances=[]
+            )
+
+        verb = Verb(
+            id=row[3],
+            infinitive=row[4],
+            english=row[5]
         )
-        for row in rows
-    ]
 
-def get_daily_questions_random(count=10):
-    connection = connect()
-    cursor = connection.cursor()
-
-    cursor.execute("""
-        SELECT
-            q.id,
-            q.english,
-            q.spanish,
-            q.verb_id,
-            q.tense_id
-        FROM questions q
-        ORDER BY RANDOM()
-        LIMIT ?
-    """, (count,))
-
-    rows = cursor.fetchall()
-
-    connection.close()
-
-    return [
-        Question(
-            id=row[0],
-            english=row[1],
-            spanish=row[2],
-            verb_id=row[3],
-            tense_id=row[4]
+        tense = Tense(
+            id=row[6],
+            code=row[7],
+            mood=row[8],
+            timeframe=row[9],
+            auxiliary_verb=db_language.get_verb_object_from_id(connection, row[10])
         )
-        for row in rows
-    ]
 
-def delete_question(question_id):
-    connection = connect()
+        person = None
+
+        if row[11] is not None:
+            person = Person(
+                id=row[11],
+                code=row[12],
+                person_number=row[13],
+                plurality=row[14]
+            )
+
+        questions[question_id].verb_instances.append(
+            VerbInstance(
+                verb,
+                tense,
+                person
+            )
+        )
+
+    return list(questions.values())
+
+def delete_question(connection, question_id):
     cursor = connection.cursor()
 
     cursor.execute("DELETE FROM questions WHERE id = ?", (question_id,))
 
-    connection.commit()
-    connection.close()
-
-def delete_all_questions():
-    connection = connect()
+def delete_all_questions(connection):
     cursor = connection.cursor()
 
     cursor.execute("DELETE FROM questions")
-
-    connection.commit()
-    connection.close()
