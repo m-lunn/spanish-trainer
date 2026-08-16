@@ -18,7 +18,7 @@ def get_fsrs_rating(input_func=input):
 
         print("Please enter a number from 1 to 4.")
 
-def run_quiz(connection, input_func=input, questions_func=db_questions.get_daily_questions_random):
+def run_quiz(connection, input_func=input, questions_func=db_questions.get_daily_questions_random, rating_input=input):
     scheduler = Scheduler()
 
     questions = questions_func(connection, 10)
@@ -54,7 +54,7 @@ def run_quiz(connection, input_func=input, questions_func=db_questions.get_daily
             )
             db_attempts.record_attempt(connection, question.id, user_answer, 0)
 
-        rating = get_fsrs_rating(input_func)
+        rating = get_fsrs_rating(rating_input)
 
         for verb_instance in question.verb_instances:
 

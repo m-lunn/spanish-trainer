@@ -12,6 +12,7 @@ def initialize_database(connection):
     initialize_tenses(connection)
     initialize_persons(connection)
     initialize_questions(connection)
+    initialize_verb_cards(connection)
 
 def create_tables(connection):
     cursor = connection.cursor()

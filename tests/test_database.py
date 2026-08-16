@@ -7,6 +7,7 @@ from database import db_initialization
 from database import db_language
 from database import db_questions
 from quiz import run_quiz
+import random
 
 
 def test_database_initializes(connection):
@@ -27,7 +28,7 @@ def test_database_initializes(connection):
     assert "persons" in table_names
     assert "attempts" in table_names
     assert "question_verb_instances" in table_names
-    assert "verb_mastery" in table_names
+    assert "verb_cards" in table_names
 
     connection.close()
 
@@ -58,79 +59,73 @@ def test_duplicate_verb_not_allowed(connection):
 #                 Questions                 #
 #############################################
 
+# def test_mastery_updating(connection):
+
+#     questions = db_questions.create_questions_from_ids(connection, [1])
+
+#     def answer_input_correct(prompt):
+#         return questions[0].spanish
+
+#     def answer_input_incorrect(prompt):
+#         return ''
+
+#     def questions_func(connection, count):
+#         return questions
 
 
-#############################################
-#                  Mastery                  #
-#############################################
+#     for _ in range(4):
+#         run_quiz(connection, answer_input_correct, questions_func)
 
-def test_mastery_updating(connection):
+#     for verb_instance in questions[0].verb_instances:
 
-    questions = db_questions.create_questions_from_ids(connection, [1])
+#         cursor = connection.cursor()
+#         cursor.execute("""
+#             SELECT mastery
+#             FROM verb_mastery
+#             WHERE verb_id = ?
+#             AND tense_id = ?
+#             AND person_id = ?
+#         """, (verb_instance.verb.id, verb_instance.tense.id, verb_instance.person.id)),
 
-    def answer_input_correct(prompt):
-        return questions[0].spanish
+#         mastery_count = cursor.fetchone()[0]
 
-    def answer_input_incorrect(prompt):
-        return ''
+#         assert mastery_count == 4
 
-    def questions_func(connection, count):
-        return questions
+#     for _ in range(3):
+#         run_quiz(connection, answer_input_correct, questions_func)
 
-
-    for _ in range(4):
-        run_quiz(connection, answer_input_correct, questions_func)
-
-    for verb_instance in questions[0].verb_instances:
-
-        cursor = connection.cursor()
-        cursor.execute("""
-            SELECT mastery
-            FROM verb_mastery
-            WHERE verb_id = ?
-            AND tense_id = ?
-            AND person_id = ?
-        """, (verb_instance.verb.id, verb_instance.tense.id, verb_instance.person.id)),
-
-        mastery_count = cursor.fetchone()[0]
-
-        assert mastery_count == 4
-
-    for _ in range(3):
-        run_quiz(connection, answer_input_correct, questions_func)
-
-    for verb_instance in questions[0].verb_instances:
+#     for verb_instance in questions[0].verb_instances:
     
-            cursor = connection.cursor()
-            cursor.execute("""
-                SELECT mastery
-                FROM verb_mastery
-                WHERE verb_id = ?
-                AND tense_id = ?
-                AND person_id = ?
-            """, (verb_instance.verb.id, verb_instance.tense.id, verb_instance.person.id)),
+#             cursor = connection.cursor()
+#             cursor.execute("""
+#                 SELECT mastery
+#                 FROM verb_mastery
+#                 WHERE verb_id = ?
+#                 AND tense_id = ?
+#                 AND person_id = ?
+#             """, (verb_instance.verb.id, verb_instance.tense.id, verb_instance.person.id)),
     
-            mastery_count = cursor.fetchone()[0]
+#             mastery_count = cursor.fetchone()[0]
     
-            assert mastery_count == 5
+#             assert mastery_count == 5
 
-    for _ in range(6):
-            run_quiz(connection, answer_input_incorrect, questions_func)
+#     for _ in range(6):
+#             run_quiz(connection, answer_input_incorrect, questions_func)
     
-    for verb_instance in questions[0].verb_instances:
+#     for verb_instance in questions[0].verb_instances:
     
-            cursor = connection.cursor()
-            cursor.execute("""
-                SELECT mastery
-                FROM verb_mastery
-                WHERE verb_id = ?
-                AND tense_id = ?
-                AND person_id = ?
-            """, (verb_instance.verb.id, verb_instance.tense.id, verb_instance.person.id)),
+#             cursor = connection.cursor()
+#             cursor.execute("""
+#                 SELECT mastery
+#                 FROM verb_mastery
+#                 WHERE verb_id = ?
+#                 AND tense_id = ?
+#                 AND person_id = ?
+#             """, (verb_instance.verb.id, verb_instance.tense.id, verb_instance.person.id)),
     
-            mastery_count = cursor.fetchone()[0]
+#             mastery_count = cursor.fetchone()[0]
     
-            assert mastery_count == 0
+#             assert mastery_count == 0
 
 
 def test_full_quiz(connection):
@@ -147,7 +142,10 @@ def test_full_quiz(connection):
     def questions_func(connection, count):
         return questions
 
-    run_quiz(connection=connection, input_func=answer_input, questions_func=questions_func)
+    def rating_input(prompt):
+        return str(random.randrange(1, 4))
+
+    run_quiz(connection=connection, input_func=answer_input, questions_func=questions_func, rating_input=rating_input)
 
     cursor = connection.cursor()
     cursor.execute("""
@@ -163,14 +161,4 @@ def test_full_quiz(connection):
         WHERE correct = 1
     """)
     assert cursor.fetchone()[0] == test_length
-
-    cursor.execute("""
-        SELECT COUNT(*)
-        FROM verb_mastery
-        WHERE mastery > 0
-    """)
-
-    mastery_count = cursor.fetchone()[0]
-
-    assert mastery_count > 0
 
