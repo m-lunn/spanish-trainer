@@ -142,9 +142,9 @@ def initialize_tenses(connection):
         auxiliary_verb_id = None
 
         if tense.is_compound:
-            if tense.auxiliary_verb == "haber":
+            if tense.auxiliary_verb.infinitive == "haber":
                 auxiliary_verb_id = haber_id
-            elif tense.auxiliary_verb == "estar":
+            elif tense.auxiliary_verb.infinitive == "estar":
                 auxiliary_verb_id = estar_id
         
         cursor.execute("""

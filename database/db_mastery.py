@@ -17,7 +17,7 @@ def update_mastery(connection, verb_id, tense_id, person_id, mastery_change):
             UPDATE verb_mastery
             SET mastery = ?, last_practiced = CURRENT_TIMESTAMP
             WHERE verb_id = ? AND tense_id = ? AND person_id = ? 
-        """, (new_mastery, record[0], record[1], [record[2]]))
+        """, (new_mastery, record[0], record[1], record[2]))
     else:
         # Insert new record
         new_mastery = max(0, mastery_change)  # Ensure mastery doesn't go below 0
