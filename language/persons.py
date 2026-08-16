@@ -1,22 +1,39 @@
-from models.person import person
+from models.person import Person
 
-persons = {
-    person(
-        "first_person_singular", 1, "singular"
+Persons = (
+    Person(
+        "FIRST_SINGULAR",
+        1,
+        "singular"
     ),
-    person(
-        "second_person_singular", 2, "singular"
+    Person(
+        "SECOND_SINGULAR",
+        2,
+        "singular"
     ),
-    person(
-        "third_person_singular", 3, "singular"
+    Person(
+        "THIRD_SINGULAR",
+        3,
+        "singular"
     ),
-    person(
-        "first_person_plural", 1, "plural"
+    Person(
+        "FIRST_PLURAL",
+        1,
+        "plural"
     ),
-    person(
-        "second_person_plural", 2, "plural"
+    Person(
+        "SECOND_PLURAL",
+        2,
+        "plural"
     ),
-    person(
-        "third_person_plural", 3, "plural"
+    Person(
+        "THIRD_PLURAL",
+        3,
+        "plural"
+    ),
+    Person(
+        "INFINITIVE",
+        0,
+        "nil"
     )
-}
+)
