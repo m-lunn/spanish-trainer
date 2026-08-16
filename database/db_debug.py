@@ -1,14 +1,4 @@
-import sqlite3
-
-DATABASE = "spanish.db"
-
-def connect():
-    connection = sqlite3.connect(DATABASE)
-    connection.execute("PRAGMA foreign_keys = ON")
-    return connection
-
-def print_database():
-    connection = connect()
+def print_database(connection):
     cursor = connection.cursor()
 
     # Get all tables in the database
@@ -37,9 +27,6 @@ def print_database():
         cursor.execute(f"SELECT * FROM {table_name}")
         rows = cursor.fetchall()
 
-        if not rows:
-            print("(empty)")
-            continue
 
         # Calculate column widths
         widths = []
@@ -61,6 +48,10 @@ def print_database():
         print(header)
         print("-" * len(header))
 
+        if not rows:
+            print("(empty)")
+            continue
+        
         # Print rows
         for row in rows:
             print(
@@ -70,5 +61,26 @@ def print_database():
                 )
             )
 
-    connection.close()
+def print_table_counts(connection):
+    cursor = connection.cursor()
 
+    cursor.execute("""
+        SELECT name
+        FROM sqlite_master
+        WHERE type = 'table'
+        AND name NOT LIKE 'sqlite_%'
+        ORDER BY name
+    """)
+
+    tables = cursor.fetchall()
+
+    print("\nDatabase table counts:")
+    print("-" * 35)
+
+    for (table_name,) in tables:
+        cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+        count = cursor.fetchone()[0]
+
+        print(f"{table_name}: {count}")
+
+    print("-" * 35)
