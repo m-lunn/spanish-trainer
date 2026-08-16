@@ -2,6 +2,7 @@ import sqlite3
 from database import db_questions, db_language
 from language import verbs, tenses, persons, seed_questions
 from database.exceptions import AuxiliaryVerbIsMissingException
+from models.verb_card import VerbCard
 
 DATABASE = "spanish.db"
 
@@ -85,18 +86,40 @@ def create_tables(connection):
     """)
 
     # -------------------------
-    # Verb/Tense/Person mastery
+    # FSRS card
     # -------------------------
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS verb_mastery (
+        CREATE TABLE IF NOT EXISTS verb_cards (
             verb_id INTEGER NOT NULL,
             tense_id INTEGER NOT NULL,
             person_id INTEGER NOT NULL,
-            mastery INTEGER NOT NULL DEFAULT 0,
-            last_practiced DATETIME,
-            next_review DATETIME,
+            state INTEGER NOT NULL,
+            step INTEGER,
+            stability REAL,
+            difficulty REAL,
+            due DATETIME NOT NULL,
+            last_review DATETIME,
 
             PRIMARY KEY (verb_id, tense_id, person_id),
+
+            FOREIGN KEY (verb_id) REFERENCES verbs(id),
+            FOREIGN KEY (tense_id) REFERENCES tenses(id),
+            FOREIGN KEY (person_id) REFERENCES persons(id)
+            )    
+    """)
+
+    # -------------------------
+    # Review logs
+    # -------------------------
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS review_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            verb_id INTEGER NOT NULL,
+            tense_id INTEGER NOT NULL,
+            person_id INTEGER NOT NULL,
+            rating INTEGER NOT NULL,
+            review_datetime DATETIME NOT NULL,
+            review_duration INTEGER,
 
             FOREIGN KEY (verb_id) REFERENCES verbs(id),
             FOREIGN KEY (tense_id) REFERENCES tenses(id),
@@ -164,10 +187,46 @@ def initialize_persons(connection):
 
 
 def initialize_questions(connection):
-    cursor = connection.cursor()
-
     for question in seed_questions.questions:
         db_questions.add_question(connection, question)
+
+
+def initialize_verb_cards(connection):
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT DISTINCT
+        verb_id,
+        tense_id,
+        person_id
+        FROM question_verb_instances
+    """)
+
+    rows = cursor.fetchall()
+
+    for row in rows:
+
+        verb_id = row[0]
+        tense_id = row[1]
+        person_id = row[2]
+
+        card = VerbCard(verb_id, tense_id, person_id)
+
+        cursor.execute("""
+            INSERT OR IGNORE INTO verb_cards (
+            verb_id,
+            tense_id,
+            person_id,
+            state,
+            step,
+            stability,
+            difficulty,
+            due,
+            last_review
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (verb_id, tense_id, person_id, card.state, card.step, card.stability, card.difficulty, card.due, card.last_review))
+
 
 
 def drop_table(connection, table_name):
@@ -178,10 +237,14 @@ def drop_table(connection, table_name):
 def drop_all_tables(connection):
     cursor = connection.cursor()
 
-    tables = ["attempts", "verb_mastery", "questions", "persons", "tenses", "verbs"]
+    cursor.execute("""
+        SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%'
+    """)
+
+    tables = cursor.fetchall()
 
     for table in tables:
-        cursor.execute(f"DROP TABLE IF EXISTS {table}")
+        cursor.execute(f"DROP TABLE IF EXISTS {table[0]}")
 
 def reset_database(connection):
     drop_all_tables(connection)
@@ -190,4 +253,5 @@ def reset_database(connection):
     initialize_tenses(connection)
     initialize_persons(connection)
     initialize_questions(connection)
+    initialize_verb_cards(connection)
     connection.commit()

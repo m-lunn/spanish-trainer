@@ -7,7 +7,6 @@ from quiz import run_quiz
 
 def main():
     with sqlite3.connect('spanish.db') as connection:
-        db_init.reset_database(connection=connection)
         run_quiz(connection)
 
 if __name__ == "__main__":

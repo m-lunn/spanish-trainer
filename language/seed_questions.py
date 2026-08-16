@@ -47,12 +47,14 @@ questions = [
             VerbInstance(
                 Verb("comer", "to eat"),
                 indicative_past_perfect,
-                first_singular
+                first_singular,
+                True
             ),
             VerbInstance(
                 Verb("llegar", "to arrive"),
                 indicative_preterite,
-                third_plural
+                third_plural,
+                False
             )
         ]
     ),
@@ -65,7 +67,8 @@ questions = [
             VerbInstance(
                 Verb("ir", "to go"),
                 indicative_preterite,
-                first_plural
+                first_plural,
+                True
             )
         ]
     ),
@@ -78,7 +81,8 @@ questions = [
             VerbInstance(
                 Verb("hablar","to speak"),
                 indicative_imperfect,
-                third_singular
+                third_singular,
+                True
             ),
         ]
     ),
@@ -91,7 +95,8 @@ questions = [
             VerbInstance(
                 Verb("ver", "to see"),
                 indicative_present_perfect,
-                first_singular
+                first_singular,
+                True
             )
         ]
     ),
@@ -104,7 +109,8 @@ questions = [
             VerbInstance(
                 Verb("entender", "to understand"),
                 indicative_present,
-                third_plural
+                third_plural,
+                True
             )
         ]
     ),
@@ -117,12 +123,14 @@ questions = [
             VerbInstance(
                 Verb("poder", "to be able to"),
                 indicative_conditional,
-                first_singular
+                first_singular,
+                True
             ),
             VerbInstance(
                 Verb("ayudar", "to help"),
                 infinitive,
-                nil_person
+                nil_person,
+                False
             )
         ]
     ),
@@ -135,12 +143,14 @@ questions = [
             VerbInstance(
                 Verb("querer", "to want"),
                 indicative_conditional_perfect,
-                third_singular
+                third_singular,
+                True
             ),
             VerbInstance(
                 Verb("venir", "to come"),
                 infinitive,
-                nil_person
+                nil_person,
+                False
             )
         ]
     ),
@@ -153,7 +163,8 @@ questions = [
             VerbInstance(
                 Verb("venir", "to come"),
                 indicative_future,
-                first_singular
+                first_singular,
+                True
             )
         ]
     ),
@@ -166,7 +177,8 @@ questions = [
             VerbInstance(
                 Verb("terminar", "to finish"),
                 indicative_future_perfect,
-                first_plural
+                first_plural,
+                True
             )
         ]
     ),
@@ -184,7 +196,9 @@ questions = [
             VerbInstance(
                 Verb("saber", "to know"),
                 subjunctive_past_perfect,
-                first_singular)
+                first_singular,
+                True
+                )
         ]
     ),
 
@@ -196,12 +210,14 @@ questions = [
             VerbInstance(
                 Verb("querer", "to want"),
                 indicative_imperfect,
-                first_singular
+                first_singular,
+                False
             ),
             VerbInstance(
                 Verb("venir", "to come"),
                 subjunctive_imperfect,
-                second_singular
+                second_singular,
+                True
             )
         ]
     ),
@@ -214,12 +230,14 @@ questions = [
             VerbInstance(
                 Verb("alegrar", "to gladden"),
                 indicative_present,
-                first_singular
+                first_singular,
+                False
             ),
             VerbInstance(
                 Verb("llegar", "to arrive"),
                 subjunctive_present_perfect,
-                third_singular
+                third_singular,
+                True
             )
         ]
     ),
@@ -232,17 +250,20 @@ questions = [
             VerbInstance(
                 Verb("esperar", "to hope"),
                 indicative_present,
-                first_singular
+                first_singular,
+                False
             ),
             VerbInstance(
                 Verb("poder", "to be able to"),
                 subjunctive_present,
-                second_singular
+                second_singular,
+                True
             ),
             VerbInstance(
                 Verb("venir", "to come"),
                 infinitive,
-                nil_person
+                nil_person,
+                False
             )
         ]
     ),
@@ -260,7 +281,8 @@ questions = [
             VerbInstance(
                 Verb("abrir", "to open"),
                 imperative_postive,
-                second_singular
+                second_singular,
+                True
             )
         ]
     ),
@@ -273,7 +295,8 @@ questions = [
             VerbInstance(
                 Verb("cerrar", "to close"),
                 imperative_negative,
-                second_singular
+                second_singular,
+                True
             )
         ]
     ),
@@ -291,7 +314,8 @@ questions = [
             VerbInstance(
                 Verb("dormir", "to sleep"),
                 progressive_past,
-                first_singular
+                first_singular,
+                True
             )
         ]
     ),
@@ -304,7 +328,8 @@ questions = [
             VerbInstance(
                 Verb("cocinar", "to cook"),
                 progressive_present,
-                first_plural
+                first_plural,
+                True
             )
         ]
     ),
@@ -317,7 +342,8 @@ questions = [
             VerbInstance(
                 Verb("hablar", "to speak"),
                 progressive_future,
-                third_plural
+                third_plural,
+                True
             )
         ]
     ),
@@ -330,7 +356,8 @@ questions = [
             VerbInstance(
                 Verb("esperar", "to wait/hope"),
                 progressive_conditional,
-                first_singular
+                first_singular,
+                True
             )
         ]
     ),
