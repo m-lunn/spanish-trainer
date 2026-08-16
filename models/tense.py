@@ -1,7 +1,12 @@
-class tense:
- 
-     def __init__(self, mood, timeframe, is_compound=False, auxiliary_verb=None):
-         self.mood = mood
-         self.timeframe = timeframe
-         self.is_compound = is_compound
-         self.auxiliary_verb = auxiliary_verb
+class Tense:
+
+    def __init__(self, code, mood, timeframe, auxiliary_verb=None, id=None):
+        self.code = code
+        self.mood = mood
+        self.timeframe = timeframe
+        self.auxiliary_verb = auxiliary_verb
+        self.id = id
+
+    @property
+    def is_compound(self):
+        return self.auxiliary_verb is not None
